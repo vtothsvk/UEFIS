@@ -1,5 +1,7 @@
 # UEFIS
 
+* [Documentation](https://github.com/vtothsvk/UEFIS/wiki)
+
 ## IS communication
 | **Resource** | **Parameter** |
 |--------------|---------------|

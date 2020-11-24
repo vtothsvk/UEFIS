@@ -10,6 +10,5 @@
 ## ECDSA
 | **Resource** | **Parameter** |
 |--------------|---------------|
-| Protocol     | prime256v1    |
-| Auth         | Bearer Auth   |
-| JWT alg      | ES256         |
+| Curve        | HTTPS         |
+| Hashing alg  | SHA256        |

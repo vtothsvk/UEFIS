@@ -1,2 +1,15 @@
 # UEFIS
-Library handling communication with the FEI UEF IS for the esp32 platform.
+
+## IS communication
+| **Resource** | **Parameter** |
+|--------------|---------------|
+| Protocol     | HTTPS         |
+| Auth         | Bearer Auth   |
+| JWT alg      | ES256         |
+
+## ECDSA
+| **Resource** | **Parameter** |
+|--------------|---------------|
+| Protocol     | HTTPS         |
+| Auth         | Bearer Auth   |
+| JWT alg      | ES256         |

@@ -6,7 +6,7 @@
 | **Resource** | **Parameter** |
 |--------------|---------------|
 | Protocol     | HTTPS         |
-| Auth         | Bearer Auth   |
+| Auth         | Bearer Token  |
 | JWT alg      | ES256         |
 
 ## ECDSA

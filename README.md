@@ -10,5 +10,5 @@
 ## ECDSA
 | **Resource** | **Parameter** |
 |--------------|---------------|
-| Curve        | HTTPS         |
+| Curve        | prime256v1    |
 | Hashing alg  | SHA256        |

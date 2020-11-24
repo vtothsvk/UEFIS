@@ -1,0 +1,1279 @@
+{
+	"info": {
+		"_postman_id": "1e95990d-0cb4-446a-b438-3387c3e106a2",
+		"name": "LogHub API FIE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "_INIT",
+			"item": [
+				{
+					"name": "Variables Init",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "12e7ce65-7448-4ba5-92a0-2a8715be2053",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "7a6e19ee-520d-4367-b4db-d37bfb25a928",
+								"exec": [
+									"var schemas = {};",
+									"",
+									"schemas.payloadList = {",
+									"\t\"definitions\": {},",
+									"\t\"type\": \"object\",",
+									"\t\"required\": [",
+									"\t\t\"data\",",
+									"\t\t\"size\",",
+									"\t\t\"total\"",
+									"\t],",
+									"\t\"properties\": {",
+									"\t\t\"data\": {",
+									"\t\t\t\"type\": \"array\",",
+									"\t\t\t\"items\": {",
+									"\t\t\t\t\"type\": \"object\"",
+									"\t\t\t}",
+									"\t\t}",
+									"\t},",
+									"\t\"size\": {",
+									"\t\t\"type\": \"integer\"",
+									"\t},",
+									"\t\"total\": {",
+									"\t\t\"type\": \"integer\"",
+									"\t}",
+									"}",
+									"",
+									"schemas.payload = {",
+									"\t\"definitions\": {},",
+									"\t\"type\": \"object\",",
+									"\t\"required\": [",
+									"\t\t\"data\"",
+									"\t],",
+									"\t\"properties\": {",
+									"\t\t\"data\": {",
+									"\t\t\t\"type\": \"object\"",
+									"\t\t}",
+									"\t}",
+									"}",
+									"",
+									"",
+									"pm.environment.unset(\"schemas\");",
+									"pm.environment.set(\"schemas\", schemas);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host_api}}",
+							"host": [
+								"{{host_api}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Suites Init",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "1577a1ed-67e6-4503-9cda-a7939ef2bdba",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "72a1b959-41cf-4984-9c04-aab8f9c3d665",
+								"exec": [
+									"pm.environment.set('helpers', `(${helpers}())`);",
+									"",
+									"function helpers () {",
+									"    var contentType = \"application/json\";",
+									"",
+									"    assertSuccessfulResponse = (response) => {",
+									"        pm.test(\"Response is 2xx\", () => {",
+									"            pm.expect(response).to.be.success;",
+									"        });",
+									"        ",
+									"        if( isCodeSuccess(pm.response) ) {",
+									"            assertJsonBodyResponse(response);",
+									"        }",
+									"    };",
+									"",
+									"    assertErrorResponse = (response) => {",
+									"        pm.test(\"Response is 4xx\", () => {",
+									"            pm.expect(response).to.be.clientError;",
+									"        });",
+									"        ",
+									"        if( pm.response.code != 401 ",
+									"            && pm.response.code != 404 ",
+									"            && pm.response.code != 415 ) {",
+									"            assertJsonBodyResponse(response);",
+									"            ",
+									"            assertErrorMessage(response);",
+									"        }",
+									"    };",
+									"    ",
+									"    assertJsonBodyResponse = (response) => {",
+									"        pm.test(\"Response has JSON Content-Type\", () => {",
+									"            pm.expect(getHeader(response,\"Content-Type\")).to.include(contentType);",
+									"        });",
+									"        pm.test(\"Response has JSON Body\", () => {",
+									"            pm.expect(response).to.have.jsonBody();",
+									"        });",
+									"    };",
+									"    ",
+									"    assertStatusCode = (response,code) => {",
+									"        pm.test(\"Response code is \"+code, () => {",
+									"            pm.expect(response.code).to.be.equal(code);",
+									"        });",
+									"    };",
+									"    ",
+									"    assertErrorMessage = (response) => {",
+									"        pm.test(\"Response has valid Error Message\", () => {",
+									"            pm.expect(response).to.have.jsonBody(\"ErrorMessage\");",
+									"        });",
+									"    };",
+									"",
+									"    assertValidJsonSchema = (response,schema) => {",
+									"        if( pm.expect(response).to.have.body() ",
+									"            && pm.expect(response).to.have.jsonBody() ) {",
+									"            assertValidJsonSchema2(response.json(),schema);",
+									"        }",
+									"        /*",
+									"        pm.test(\"Response has valid schema\", () => {",
+									"          pm.expect(tv4.validate(response.json(),schema, false, false)).to.be.true;  ",
+									"        });",
+									"        */",
+									"    };",
+									"    ",
+									"    assertValidJsonSchema2 = (jsonData,schema) => {",
+									"        pm.test(\"Response has valid schema\", () => {",
+									"          pm.expect(tv4.validate(jsonData,schema, false, false)).to.be.true;  ",
+									"        });",
+									"    };",
+									"    ",
+									"    /**",
+									"     * Returns the specified response header (case-insensitive)",
+									"     */",
+									"    getHeader = (response, name) => {",
+									"        name = name.toLowerCase();",
+									"        let header = response.headers.find(({ key }) => key.toLowerCase() === name);",
+									"        if (header) {",
+									"            return header.value;",
+									"        }",
+									"    };",
+									"    ",
+									"    isCodeSuccess = (response) => {",
+									"        if( pm.response.code >= 200 && pm.response.code < 300 ) return true;",
+									"        return false;",
+									"    };",
+									"    ",
+									"    setDelay = (delay) => {",
+									"        setTimeout(checkStatusCode, delay);",
+									"        function checkStatusCode() {",
+									"            pm.sendRequest('https://postman-echo.com/get', function (err, res) {",
+									"                tests['status code should be 200'] = res.code === 200;",
+									"            });",
+									"        }",
+									"    };",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host_api}}",
+							"host": [
+								"{{host_api}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "853701a7-1312-404d-9754-ed767ce06156",
+								"exec": [
+									"assertSuccessfulResponse(pm.response);",
+									"",
+									"pm.test(\"Response has User Data\", function(){",
+									"    var userData = pm.response.json();",
+									"    // pm.response.to.have.jsonBody(\"ApiUserId\");",
+									"    pm.environment.set(\"auth_apiKey\",userData.SessionPassword);",
+									"    pm.environment.set(\"auth_login\",userData.ApiUserUsername);",
+									"})",
+									"",
+									"pm.environment.set(\"variable_key\", \"variable_value\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "login",
+									"value": "{{auth_username}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{auth_password}}",
+									"type": "text"
+								},
+								{
+									"key": "login",
+									"value": "tomas.macho",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "Tomasko1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "login",
+									"value": "macho.tomas97@gmail.com",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "heslo",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/auth/login",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Auth",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host}}/auth",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host}}/auth/logout",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Registration Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6078f980-22d1-4181-8e84-3464b2cf8f7e",
+								"exec": [
+									"if( pm.response.code == 200 ) {",
+									"    pm.environment.set(\"auth_verificationToken\",pm.response.text())",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}/testing/token?email={{auth_username}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"testing",
+								"token"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{auth_username}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Device",
+			"item": [
+				{
+					"name": "Get All Devices",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a10a3a4d-5e88-4f9d-9b5a-0b8e974dcfe7",
+								"exec": [
+									"assertSuccessfulResponse(pm.response);",
+									"",
+									"assertValidJsonSchema(pm.response, pm.environment.get(\"schemas\").payloadList);",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host_api}}/devices/v2",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"devices",
+								"v2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Device",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8d26b17f-48ad-417f-a8f4-f26bbad613a6",
+								"exec": [
+									"assertSuccessfulResponse(pm.response);",
+									"",
+									"assertValidJsonSchema(pm.response, pm.environment.get(\"schemas\").payload)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host_api}}/devices/v2/08d878eb-88eb-4bd2-8486-31b9b33025da",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"devices",
+								"v2",
+								"08d878eb-88eb-4bd2-8486-31b9b33025da"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjFlODk1ZjVlYzE3ZjdiOWU4NDA1OTgyMzczZWNjOTA4ZGNlOTQwYzhkNDRmZDEzZGRjMDc0NGJlNDNjM2FkODAifQ.eyJpYXQiOjE2MDM2NDc1NjEsImV4cCI6MTYwMzczMzk2MSwic3ViIjoiMDAwMDAwMDAwMDM1YWU5NCJ9.UqHZgi3q4aCoGADUYK8-h6BRlrAq-undiwMY0h_dANv1IUj1nrSVCLqMp8sVeSynnMrmPWSC8j8O-GBGumeOyQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\n[\n  {\n    \"LoggerName\": \"temp1\",\n    \"Timestamp\": 1598608068,\n    \"MeasuredData\": [\n      {\n        \"Name\": \"LubovolnyTyp\",\n        \"Value\": 5,\n      }\n    ],\n    \"ServiceData\": [\n    ],\n    \"DebugData\": [\n    ],\n    \"DeviceId\": \"08d878eb-88eb-4bd2-8486-31b9b33025da\"\n  }\n]"
+						},
+						"url": {
+							"raw": "{{host_api}}/Auth",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"Auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get my config",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "f754b75a-8e85-4d50-acc1-4d7acf840fce",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "9k5nu3O4yXJUowUIRQqiSYKlYTKF8S28I6xWMdy773rq34Dpn9Mp0c9TZh5hgrYA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host_api}}/service/config",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"service",
+								"config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "device check",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "vIYN1C4JRmGujlLFWE1vHZyL6pQ68OFy4JIuBIN3VujzEyPwKCvkkIduKomd6i39",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "b3b25549-ad10-4858-8064-f2beaca892f9",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host_api}}/service/check",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"service",
+								"check"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "device accept config",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "vIYN1C4JRmGujlLFWE1vHZyL6pQ68OFy4JIuBIN3VujzEyPwKCvkkIduKomd6i39",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "b3b25549-ad10-4858-8064-f2beaca892f9",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"CommandId\":22,\n\t\"ConfirmationData\": {\n\t\"additionalProp1\": {},\n    \"additionalProp2\": {},\n    \"additionalProp3\": {}\n  },\n  \"Hash\": \"8730bedadb4b5132c725d6ed3ba899475237f0de\"\n}"
+						},
+						"url": {
+							"raw": "{{host_api}}/service/config/22/confirm",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"service",
+								"config",
+								"22",
+								"confirm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create device",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"MacAddress\": \"03:0F:51:F9:E0:88\",\n\t\"SerialNumber\": \"000000000035ae92\",\n\t\"PublicKey\": \"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExHQtv7j30TFZE4Ku3WP+Wv3XaY8HiEkdWzvzYoEeXiHmYlBB+KhTjcJC6KC/R4Fla2zEFvmki9wKKqg1kMdzFg==\",\n\t\"KeySignature\":\"1affc015ffb09ed59319ee7833b3d1c47f346c51e3fb5778cd5ef0f8e3ea331e\",\n\t\"Interval\": 1, \n\t\"Config\": {\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{host_api}}/noAuth/createDevice",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"noAuth",
+								"createDevice"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register device",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update device",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"DeviceName\":\"lol\"\n}"
+						},
+						"url": {
+							"raw": "{{host_api}}/devices/v2/03a6da54-9bf8-4a40-bd8e-3d5f4c7a565a",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"devices",
+								"v2",
+								"03a6da54-9bf8-4a40-bd8e-3d5f4c7a565a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete device",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host_api}}/devices/v2/b91fc998-5ea2-45a4-bfab-92658478b6e9",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"devices",
+								"v2",
+								"b91fc998-5ea2-45a4-bfab-92658478b6e9"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "collections",
+			"item": [
+				{
+					"name": "get all my collections",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host_api}}/collections",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"collections"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get collection detail",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{host_api}}/collections/2",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"collections",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create collection",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Name\" : \"obyvacka\",\n  \"Icon\" : \"livingRoom\",\n  \"DeviceId\" : [\n    \"08d878eb-88eb-4bd2-8486-31b9b33025da\"\n  ],\n  \"SharedUsers\" : [\n  \t{\n  \t\t\"ApiUserId\": 5,\n  \t\t\"Permission\": \"Editor\"\n  \t}\n  \t]\n}"
+						},
+						"url": {
+							"raw": "{{host_api}}/collections",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"collections"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add user to collection",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "ApiUserId",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host_api}}/collections/2",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"collections",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add device to collection",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "DeviceId",
+									"value": "08d8790c-f60c-4931-8c58-233049ab74a3",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host_api}}/collections/2/addDevice",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"collections",
+								"2",
+								"addDevice"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "process invitation to collection",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Decision",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host_api}}/collections/38/processInvitation",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"collections",
+								"38",
+								"processInvitation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateCollectionInfo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"CollectionId\" : 36,\n  \"Name\" : \"kuchyna\",\n  \"Description\" : \"dlhsi popis\",\n  \"Icon\" : \"kitchen\",\n  \"DeviceId\" : [\n    \"b3b25549-ad10-4858-8064-f2beaca892f9\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{host_api}}/collections",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"collections"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete collection",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "CollectionId",
+									"value": "37",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host_api}}/collections",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"collections"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete user from collection",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "ApiUserId",
+									"value": "4",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host_api}}/collections/38/removeUser",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"collections",
+								"38",
+								"removeUser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete device from collection",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "DeviceId",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host_api}}/collections/38/removeDevice",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"collections",
+								"38",
+								"removeDevice"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "registration",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \r\n\t\"Email\": \"macho.tomas97@gmail.com\",\r\n\t\"Username\":\"quesit\",\r\n\t\"Password\": \"heslo\",\r\n\t\"ConfirmPassword\": \"heslo\",\r\n    \"FirstName\": \"Test1\",\r\n    \"LastName\":\"Test2\",\r\n    \"CompanyName\": \"Test company\",\r\n\t\"DateOfPurchase\": 0,\r\n    \"InvoiceId\": \"12345\"\r\n}"
+						},
+						"url": {
+							"raw": "{{host}}/auth/register",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "token",
+									"value": "Rd50nGxh6MRuETcqjQ10OO1TfYR7JTYzXDdjvn0",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/auth/verify",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "statistics",
+			"item": [
+				{
+					"name": "get data from loggerId with period",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"TimeFrom\": 1580601600,\n\t\"TimeTo\": 1580603200,\n\t\"HoursFrom\": \"00:00:00\",\n\t\"HoursTo\": \"00:01:40\",\n\t\"Function\": \"avg\",\n\t\"SensorsData\": [\n\t\t{\n\t\t\t\"LoggerMacAddress\": \"b3b25549-ad10-4858-8064-f2beaca892f9_temp1\",\n\t\t\t\"DeviceId\": \"b3b25549-ad10-4858-8064-f2beaca892f9\",\n\t\t\t\"EventTypeName\": \"temperature\"\n\t\t}\n\t\t]\n}"
+						},
+						"url": {
+							"raw": "{{host_api}}/statistics/groups",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"statistics",
+								"groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get data from loggerid",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"DateFrom\": 1598608060,\n\t\"DateTo\": 1598608077,\n\t\"SensorsData\": [\n\t\t{\n\t\t\t\"LoggerName\": \"temp1\",\n\t\t\t\"DeviceId\": \"08d878eb-88eb-4bd2-8486-31b9b33025da\",\n\t\t\t\"EventTypeName\": \"Temperature\"\n\t\t},\n\t\t{\n\t\t\t\"LoggerName\": \"temp1\",\n\t\t\t\"DeviceId\": \"08d878eb-88eb-4bd2-8486-31b9b33025da\",\n\t\t\t\"EventTypeName\": \"Temperatwedwedwedweure\"\n\t\t}\n\t\t]\n}"
+						},
+						"url": {
+							"raw": "{{host_api}}/statistics",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"statistics"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Configs",
+			"item": [
+				{
+					"name": "get config for device",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host_api}}/devices/v2/44dffbba-4d6f-4869-99b2-4c4d19b5d2d4/config",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"devices",
+								"v2",
+								"44dffbba-4d6f-4869-99b2-4c4d19b5d2d4",
+								"config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post config for device",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"DeviceName\": \"blaa\",\n        \"Interval\": 0,\n        \"AdditionalData\": {\n        \t\"additionalProp1\": {},\n            \"hocico\": {\n                \"hocico2\": {\n                    \"hocico3\": {\n                        \"hocico4\": \"ahoj\"\n                    }\n                }\n            }\n        }\n   \n}"
+						},
+						"url": {
+							"raw": "{{host_api}}/devices/b3b25549-ad10-4858-8064-f2beaca892f9/configg",
+							"host": [
+								"{{host_api}}"
+							],
+							"path": [
+								"devices",
+								"b3b25549-ad10-4858-8064-f2beaca892f9",
+								"configg"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "username",
+				"value": "{{auth_login}}",
+				"type": "string"
+			},
+			{
+				"key": "password",
+				"value": "{{auth_apiKey}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "7d9fc64a-094f-4d5b-96d0-3c5936339ef9",
+				"type": "text/javascript",
+				"exec": [
+					"eval(pm.environment.get('helpers'));"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "85b9eeca-3df8-45a2-b12f-3ac178f27aca",
+				"type": "text/javascript",
+				"exec": [
+					"eval(pm.environment.get('helpers'));"
+				]
+			}
+		}
+	]
+}

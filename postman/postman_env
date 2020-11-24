@@ -1,0 +1,81 @@
+{
+	"id": "bd84c59a-22d1-47c1-9472-da67f35d4548",
+	"name": "API - Localhost",
+	"values": [
+		{
+			"key": "host",
+			"value": "https://localhost:5001",
+			"enabled": true
+		},
+		{
+			"key": "host_api",
+			"value": "{{host}}/api/v1",
+			"enabled": true
+		},
+		{
+			"key": "auth_username",
+			"value": "develop@r-das.sk",
+			"enabled": true
+		},
+		{
+			"key": "auth_password",
+			"value": "heslo",
+			"enabled": true
+		},
+		{
+			"key": "auth_apiKey",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "t_deviceId",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "schemas",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "helpers",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "auth_login",
+			"value": "admin",
+			"description": "",
+			"enabled": true
+		},
+		{
+			"key": "host_server",
+			"value": "",
+			"description": "",
+			"enabled": true
+		},
+		{
+			"key": "accessTokenExpiry",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "currentAccessToken",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "variable_key",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "auth_bearer",
+			"value": "",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2020-10-26T21:31:19.449Z",
+	"_postman_exported_using": "Postman/6.7.4"
+}
